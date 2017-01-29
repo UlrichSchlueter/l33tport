@@ -9,7 +9,7 @@ me a beer in return. Thomas Mellenthin.
 */
 
 const SPEEDPORT = "192.168.2.1"; // the IP address or hostname of your speedport
-const PASSWORD  = "66666666"; // the login-password of the speedport
+const PASSWORD  = "93975707"; // the login-password of the speedport
 
 // Requiremtens: commander, sjcl
 //
@@ -234,16 +234,31 @@ function downloadJsonInfo(fileName, dataCallback)
  *
  * Solution from http://stackoverflow.com/a/10666489/699208
  */
-function walkArray(inArray, dsNames) {
-    var s = [];
+function walkArray(inArray,dsNames)
+{
+   var s = [];
+   walkArrayEx(s,"",inArray, dsNames)
+   return s.join(":")
+}
+
+function walkArrayEx(resultArray,path,inArray, dsNames) {    
+    var fullKey;
     for(var k in inArray) {
-      if(typeof inArray[k] == 'object') {
-        s.push(walkArray(inArray[k], dsNames) );
+      if (path !="")
+	{ fullKey=path+"."+k }
+      else { fullKey=k }
+      
+      if(typeof inArray[k] == 'object') {        
+ 	
+	walkArrayEx(resultArray,fullKey,inArray[k], dsNames);
       }
       else {
+	console.warn("key:",fullKey, inArray[k])	
         for (var dsName in dsNames) {
-          if (k == dsNames[dsName]) {
-            s.push(inArray[k]);
+         
+          if (fullKey == dsNames[dsName]) {
+	    console.warn("Match", fullKey)
+            resultArray.push(inArray[k]);
           }
         }
       }
@@ -251,7 +266,7 @@ function walkArray(inArray, dsNames) {
     
     // For unknown reasons, the result is prefixed with a colon
     // sometimes. I guess the array contains bogus content then.
-    return s.join(":").replace(/^:/, '');
+    return;
 }
 
 /**
@@ -308,14 +323,29 @@ if (program.output && program.output != 'rrd') {
 else if (program.filename && program.dsNames) {
   getChallenge(program.filename, function(data) {
     var parsed = safeParse(data);
-
+   
     // split fields
-    dsNames = program.dsNames.split(',');
+    dsNames=program.dsNames.split(',');
+   
     var rrdUpdate = '--template ';
     for (var dsName in dsNames) {
-      rrdUpdate += dsNames[dsName];
+     console.warn(dsNames[dsName])
+
+     var splitParameterArray=dsNames[dsName].split('=');
+     console.warn(splitParameterArray)
+     if (splitParameterArray.length==2){	
+	rrdUpdate += splitParameterArray[1]
+	dsNames[dsName]=splitParameterArray[0]
+	}
+      else {
+	   rrdUpdate += splitParameterArray[0]
+	}	
+
       rrdUpdate += ':';
     }
+
+
+
     // truncate last colon
     rrdUpdate = rrdUpdate.slice(0,-1);
 

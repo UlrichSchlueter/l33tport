@@ -31,4 +31,11 @@ rrdtool create lteinfo.rrd --step 60 \
   RRA:MAX:0.5:1:2880 \
   RRA:AVERAGE:0.5:10:144 \
   RRA:MAX:0.5:10:144
+
+rrdtool create bondingtunnel.rrd --step 60 \
+  DS:InOctets:COUNTER:120:0:4294967295 \
+  DS:OutOctets:COUNTER:120:0:4294967295 \
+  RRA:AVERAGE:0.5:1:2016                \
+  RRA:HWPREDICT:1440:0.1:0.0035:288
+
  
