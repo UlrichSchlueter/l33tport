@@ -9,7 +9,7 @@ me a beer in return. Thomas Mellenthin.
 */
 
 const SPEEDPORT = "192.168.2.1"; // the IP address or hostname of your speedport
-const PASSWORD  = "93975707"; // the login-password of the speedport
+const PASSWORD  = "6666666666"; // the login-password of the speedport
 
 // Requiremtens: commander, sjcl
 //

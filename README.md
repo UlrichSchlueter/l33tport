@@ -2,7 +2,11 @@
 l33tport
 ======
 
+
 #### Downloads JSON status data from Telekom Speedport Hybrid
+
+Please note this is a fork of the l33tport https://github.com/melle/l33tport. Any reduction in quality are fully on me.
+
 
 You own a Telekom Speedport Router? The web-interface sucks? It forces you to login every fucking time? You want to draw fancy rrdtool-graphs from raw data?
 
@@ -117,9 +121,20 @@ rrdtool integration
 
 ![A DSL line with lots of errors.](assets/dsl-48h.png)
 
-l33tport 's output may be formatted to fit as input for 'rddtool update' command. The rrdtool data source names must be equal to names used in the JSON. Example for updating the dsl-Databae:
+l33tport 's output may be formatted to fit as input for 'rddtool update' command. The json data delivered by the router has a tree structure that can contain list of elements (like in the bonding_tunnel case).
+The formating parameter accepts mapping between the JSON data and the rrdtool format:
+Example: 
 
-    $ ./l33tport.js -f dsl -o rrd -d "uSNR,dSNR,uactual,dactual,uatainable,dattainable"
+-d "Line.uSNR=uSNR" picks up the uSNR data in the Line Object in the above DSL example
+
+This is more interesting for list cases like in the bonding tunnel
+
+{"TcpExt":[{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"12"},{"TcpExt":"6"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"2789"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"155848"},{"TcpExt":"35"},{"TcpExt":"84"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"3"},{"TcpExt":"0"},{"TcpExt":"1824"},{"TcpExt":"0"},{"TcpExt":"625151"},{"TcpExt":"2"},{"TcpExt":"33382"},{"TcpExt":"699867"},{"TcpExt":"0"},{"TcpExt":"8"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"1"},{"TcpExt":"38"},{"TcpExt":"1"},{"TcpExt":"0"},{"TcpExt":"248"},{"TcpExt":"68"},{"TcpExt":"9"},{"TcpExt":"0"},{"TcpExt":"203"},{"TcpExt":"484"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"84"},{"TcpExt":"0"},{"TcpExt":"44"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"5"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"19"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"10"},{"TcpExt":"21"},{"TcpExt":"326"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"},{"TcpExt":"0"}],"IpExt":[{"IpExt":"1"},{"IpExt":"0"},{"IpExt":"52935"},{"IpExt":"4856"},{"IpExt":"9282"},{"IpExt":"0"},{"IpExt":"997837387"},{"IpExt":"1045975015"},{"IpExt":"9829342"},{"IpExt":"183551"},{"IpExt":"1944800"},{"IpExt":"0"}],"ireg":[{"ireg":"20864551"},{"ireg":"0"},{"ireg":"20857770"},{"ireg":"47"},{"ireg":"0"},{"ireg":"0"},{"ireg":"0"},{"ireg":"1193090"},{"ireg":"309"},{"ireg":"1"},{"ireg":"354590"},{"ireg":"0"},{"ireg":"0"},{"ireg":"0"},{"ireg":"0"}],"lte_tunnel":"Up","dsl_tunnel":"Up","bonding":"Up","ipv4":"87.135.132.22","subnet_mask":"255.255.128.0","ipv6_pre":"2003:0006:1404:c700::/56"}
+
+
+-d "IpExt.6.IpExt=InOctets" picks ups the the 6th entry in the IpExt List of Objects, which is the field that is labeled InOctets in the WebUI (view the source code of the page)
+
+    $ ./l33tport.js -f dsl -o rrd -d "Line.uSNR=uSNR,Line.dSNR=dSNR,Line.uactual=uactual,Line.dactual=dactual,Line.uatainable=uatainable,Line.dattainable=dattainable"
 
 The output looks like this:
 
@@ -127,6 +142,6 @@ The output looks like this:
    
 It may be fed directly into a ```rrdtool update``` call:
 
-    rrdtool update dsl.rrd $(./l33tport.js -f dsl -o rrd -d "uSNR,dSNR,uactual,dactual,uatainable,dattainable")
+    rrdtool update dsl.rrd $(./l33tport.js -f dsl -o rrd -d "Line.uSNR=uSNR,Line.dSNR=dSNR,Line.uactual=uactual,Line.dactual=dactual,Line.uatainable=uatainable,Line.dattainable=dattainable")
 
 See the ```rrdtool``` directory for sample scripts.
